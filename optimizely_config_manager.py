@@ -1,6 +1,7 @@
 import requests
 from optimizely import optimizely
 from optimizely.logger import SimpleLogger
+from redisenqueuer import RedisEnqueuer
 
 class OptimizelyConfigManager(object):
   obj = None
@@ -18,7 +19,7 @@ class OptimizelyConfigManager(object):
       url = 'https://cdn.optimizely.com/json/{0}.json'.format(self.project_id)
 
     datafile = self.retrieve_datafile(url)
-    self.obj = optimizely.Optimizely(datafile, None, SimpleLogger())
+    self.obj = optimizely.Optimizely(datafile, logger=SimpleLogger(), event_dispatcher=RedisEnqueuer())
 
   def retrieve_datafile(self, url):
     datafile = requests.get(url).text

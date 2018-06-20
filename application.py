@@ -6,14 +6,11 @@ from __future__ import print_function
 import csv
 import json
 import os
+
 from operator import itemgetter
-
 from optimizely_config_manager import OptimizelyConfigManager
-
+from optimizely_entity_conf import PROJECT_ID, EXPERIMENT_KEY, EVENT_KEY
 from flask import Flask, render_template, request
-
-# update project_id
-PROJECT_ID = '<project_id>'
 
 application = Flask(__name__, static_folder='images')
 application.secret_key = os.urandom(24)
@@ -44,7 +41,7 @@ def shop():
   user_id = request.form['user_id']
   
   # compute variation_key
-  variation_key = config_manager.get_obj().activate('<experiment_key>', user_id)
+  variation_key = config_manager.get_obj().activate(EXPERIMENT_KEY, user_id)
 
   # load items
   sorted_items = build_items()
@@ -68,7 +65,7 @@ def buy():
   user_id = request.form['user_id']
 
   # track conversion event
-  config_manager.get_obj().track("<event_key>", user_id)
+  config_manager.get_obj().track(EVENT_KEY, user_id)
     
   return render_template('purchase.html')
 
