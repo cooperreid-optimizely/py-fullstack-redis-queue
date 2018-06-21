@@ -3,15 +3,16 @@ import redis
 import pprint
 import requests
 
-REQUEST_TIMEOUT = 10
+REQUEST_TIMEOUT     = 10
+CONNECTION_SETTINGS = {'host': 'localhost'}
 
-class RedisStore(object):
+class RedisBroker(object):
 
   redis_key     = 'pendingEvents'
   redis_key_tmp = 'pendingEventsProcessing'
 
   def __init__(self):
-    self.redis_connection = redis.Redis(host='localhost')
+    self.redis_connection = redis.Redis(**CONNECTION_SETTINGS)
 
   def store_event(self, event):
     """
@@ -75,7 +76,13 @@ class RedisStore(object):
         response = session.send(prepped, timeout=REQUEST_TIMEOUT)        
 
 if __name__ == '__main__':
-    rs = RedisStore()
+  import argparse
+  parser = argparse.ArgumentParser(description='Emit events enqueued in Redis')
+  parser.add_argument('--emit', '-emit', dest='emit', action='store_true')
+  args = parser.parse_args()  
+  # emit enqueued events
+  if args.emit:
+    rs = RedisBroker()
     rs.emitEvents()
 
 
