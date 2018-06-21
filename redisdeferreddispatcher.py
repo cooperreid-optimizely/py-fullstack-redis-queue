@@ -1,6 +1,6 @@
 from redisbroker import RedisBroker
 
-class RedisEnqueuer(object):
+class RedisDeferredDispatcher(object):
 
   def __init__(self):
     self.redis_client = RedisBroker()
