@@ -10,6 +10,12 @@ This Demo App is based on [this repository](https://github.com/optimizely/python
 
 ---
 
+### Connecting to Redis
+
+This app uses [Redis-Py](https://github.com/andymccurdy/redis-py) to connect to Redis. This dependency lives within the `requirements.txt` file, and will be installed automatically when following installation instructions.
+
+The Redis connection settings live within the [redisbroker.py](https://github.com/cooperreid-optimizely/py-fullstack-redis-queue/blob/master/redisbroker.py#L7) file. Adapt the connection settings to reflect the location of your running redis instance.
+
 ### Overriding Optimizely's default dispatch with `Redis Deferred Dispatcher`
 
 When instantiating the Optimizely client, pass the argument `event_dispatcher=RedisDeferredDispatcher()` as shown below:
