@@ -43,19 +43,23 @@ class RedisBroker(object):
 
   def batchedEvents(self, events):
     """
-    Batches are account-project level
-    Each event's `visitor` data is copied into a large batch
-    These cannot be consolidated by `snapshots` because `attributes` live at the visitor level
+    Batches are grouped at the project level
+    
+    Explanation:
+    - The `visitor` data from an individual event payload is copied/appended to the `visitors` Array sent within the batch payload
+    - The events cannot be consolidated by `snapshots` because `attributes` live at the visitor level. If for some reason a visitor 
+      had different attributes for two events within the same decision, it would be problematic to send only multiple `snapshots` 
+      because visitor attributes live immediately under the `visitor` object which is a level above snapshots.
     """
     groupings = {}
     for event in events:
         event_metadata = json.loads(event)
         if event_metadata.get('grouping') not in groupings:
             groupings[event_metadata.get('grouping')] = event_metadata
-            continue
-        visitor_batch = groupings[event_metadata.get('grouping')]['params']['visitors']
-        event_visitor = event_metadata.get('params', {}).get('visitors')
-        groupings[event_metadata.get('grouping')]['params']['visitors'] = visitor_batch + event_visitor
+        else:
+          visitor_batch = groupings[event_metadata.get('grouping')]['params']['visitors']
+          event_visitor = event_metadata.get('params', {}).get('visitors')
+          groupings[event_metadata.get('grouping')]['params']['visitors'] = visitor_batch + event_visitor
     return groupings
 
   def emitEvents(self):
