@@ -4,11 +4,13 @@ This Demo App shows how you can override the default Optimizely `Event Dispatche
 
 ---
 
-#### Installation and Setup
+### Installation and Setup
 
 This Demo App is based on [this repository](https://github.com/optimizely/python-sdk-demo-app). Follow the installation and setup instructions prior to advancing to the Redis configuration outlined below.
 
-#### Configuring the Optimizely Client to use the `Redis Deferred Dispatcher` instead of the default `Event Dispatcher`
+---
+
+### Overriding Optimizely's default dispatch with `Redis Deferred Dispatcher`
 
 When instantiating the Optimizely client, pass the argument `event_dispatcher=RedisDeferredDispatcher()` as shown below:
 ```
@@ -20,7 +22,7 @@ client = optimizely.Optimizely(datafile, event_dispatcher=RedisDeferredDispatche
 > It's important an instance is passed into the constructor, not the class itself
 
 
-#### Using the `Redis Broker` to emit the enqueued events to Optimizely
+### Using the `Redis Broker` to emit the enqueued events to Optimizely
 
 At some scheduled interval, run the command that will dispatch the queued events to Optimizely and purge them from the local Redis store.
 ```
