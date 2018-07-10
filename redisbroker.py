@@ -77,7 +77,8 @@ class RedisBroker(object):
                     headers=request_headers,
                   )
         prepped  = session.prepare_request(request)
-        response = session.send(prepped, timeout=REQUEST_TIMEOUT)        
+        response = session.send(prepped, timeout=REQUEST_TIMEOUT)   
+    return batches     
 
 if __name__ == '__main__':
   import argparse
@@ -87,6 +88,11 @@ if __name__ == '__main__':
   # emit enqueued events
   if args.emit:
     rs = RedisBroker()
-    rs.emitEvents()
+    sent_batches = rs.emitEvents()
+    # count total events dispatched
+    total_events = 0
+    for batch in sent_batches:
+      total_events = total_events + len(batch.get('params', {}).get('visitors', []))      
+    print("Dispatched {} events.".format(total_events))
 
 
