@@ -83,7 +83,7 @@ class RedisBroker(object):
 if __name__ == '__main__':
   import argparse
   parser = argparse.ArgumentParser(description='Emit events enqueued in Redis')
-  parser.add_argument('--emit', '-emit', dest='emit', action='store_true')
+  parser.add_argument('--emit', '-emit', dest='emit', help='Emit all redis-enqueued events to Optimizely events endpoint, and then flush them from redis.', action='store_true', required=True)
   args = parser.parse_args()  
   # emit enqueued events
   if args.emit:
