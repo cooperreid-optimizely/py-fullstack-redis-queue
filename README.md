@@ -8,6 +8,13 @@ This Demo App shows how you can override the default Optimizely `Event Dispatche
 
 This Demo App is based on [this repository](https://github.com/optimizely/python-sdk-demo-app). Follow the installation and setup instructions prior to advancing to the Redis configuration outlined below.
 
+In order for the Optimizely SDK to instiate properly, activate the correct experiment, and fire the correct events, you'll have to either
+* Set the `entity_keys` as ENV variables
+  * demoapp_PROJECT_ID
+  * demoapp_EXPERIMENT_KEY
+  * demoapp_EVENT_KEY
+* Hardcode the `entity_keys` within the `optimizely_entity_conf.py` file
+
 ---
 
 ### Connecting to Redis
