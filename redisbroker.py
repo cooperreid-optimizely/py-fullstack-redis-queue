@@ -14,6 +14,9 @@ class RedisBroker(object):
   def __init__(self):
     self.redis_connection = redis.Redis(**CONNECTION_SETTINGS)
 
+  def count(self):
+    return len(self.get_all_data(self.redis_key))
+
   def store_event(self, event):
     """
     Store event in Redis
@@ -53,39 +56,41 @@ class RedisBroker(object):
     """
     groupings = {}
     for event in events:
-        event_metadata = json.loads(event)
-        if event_metadata.get('grouping') not in groupings:
-            groupings[event_metadata.get('grouping')] = event_metadata
-        else:
-          visitor_batch = groupings[event_metadata.get('grouping')]['params']['visitors']
-          event_visitor = event_metadata.get('params', {}).get('visitors')
-          groupings[event_metadata.get('grouping')]['params']['visitors'] = visitor_batch + event_visitor
+      event_metadata = json.loads(event)
+      if event_metadata.get('grouping') not in groupings:
+          groupings[event_metadata.get('grouping')] = event_metadata
+      else:
+        visitor_batch = groupings[event_metadata.get('grouping')]['params']['visitors']
+        event_visitor = event_metadata.get('params', {}).get('visitors')
+        groupings[event_metadata.get('grouping')]['params']['visitors'] = visitor_batch + event_visitor
     return groupings
 
   def emitEvents(self):
     tmp_batches = self.copy_purge(self.redis_key, self.redis_key_tmp)
     batches     = self.batchedEvents(tmp_batches).values()
     for batch in batches:
-        session         = requests.Session()
-        request_url     = batch.get('url')
-        request_headers = batch.get('headers')
-        http_verb       = batch.get('http_verb', 'POST')
-        request = requests.Request(
-                    http_verb, 
-                    request_url, 
-                    json=batch.get('params'), 
-                    headers=request_headers,
-                  )
-        prepped  = session.prepare_request(request)
-        response = session.send(prepped, timeout=REQUEST_TIMEOUT)   
+      session         = requests.Session()
+      request_url     = batch.get('url')
+      request_headers = batch.get('headers')
+      http_verb       = batch.get('http_verb', 'POST')
+      request = requests.Request(
+                  http_verb, 
+                  request_url, 
+                  json=batch.get('params'), 
+                  headers=request_headers,
+                )
+      prepped  = session.prepare_request(request)
+      response = session.send(prepped, timeout=REQUEST_TIMEOUT)   
     return batches     
 
 if __name__ == '__main__':
   import argparse
   parser = argparse.ArgumentParser(description='Emit events enqueued in Redis')
-  parser.add_argument('--emit', '-emit', dest='emit', help='Emit all redis-enqueued events to Optimizely events endpoint, and then flush them from redis.', action='store_true', required=True)
+  parser.add_argument('--emit', '-emit', dest='emit', help='Emit all redis-enqueued events to Optimizely events endpoint, and then flush them from redis.', action='store_true')
+  parser.add_argument('--count', '-count', dest='count', help='Print total events queued.', action='store_true')  
   args = parser.parse_args()  
   # emit enqueued events
+
   if args.emit:
     rs = RedisBroker()
     sent_batches = rs.emitEvents()
@@ -94,5 +99,9 @@ if __name__ == '__main__':
     for batch in sent_batches:
       total_events = total_events + len(batch.get('params', {}).get('visitors', []))      
     print("Dispatched {} events.".format(total_events))
-
+  elif args.count:
+    rs = RedisBroker()
+    print("Events: {}".format(rs.count()))
+  else:
+    parser.print_help()
 
